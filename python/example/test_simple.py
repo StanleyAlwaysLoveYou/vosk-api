@@ -2,7 +2,10 @@
 
 import wave
 import sys
-
+from scipy.io import wavfile
+from scipy import signal
+import numpy as np
+import matplotlib.pyplot as plt
 from vosk import Model, KaldiRecognizer, SetLogLevel
 
 # You can set log level to -1 to disable debug messages
@@ -20,16 +23,37 @@ model = Model(lang="en-us")
 # model = Model("models/en")
 
 rec = KaldiRecognizer(model, wf.getframerate())
-rec.SetWords(True)
-rec.SetPartialWords(True)
+print('sampling rate = {}'.format(wf.getframerate()))
+rec.SetWords(False)
+rec.SetPartialWords(False)
+nframes = wf.getnframes()
+print('num of frames: {}'.format(nframes))
+text = ' '
 
 while True:
-    data = wf.readframes(4000)
+    data = wf.readframes(10000)
     if len(data) == 0:
         break
-    if rec.AcceptWaveform(data):
-        print(rec.Result())
+    rec.AcceptWaveform(data)
+    if 'one' in text:
+        text = rec.Result()
+        print('rec result: {}'.format(text))
     else:
-        print(rec.PartialResult())
+        text = rec.PartialResult()
+        print('rec Partial result: {}'.format(text))
 
-print(rec.FinalResult())
+# print('final result: {}'.format(rec.FinalResult()))
+
+
+
+
+
+fs, wave = wavfile.read(sys.argv[1])
+f, t, S = signal.spectrogram(wave, fs)
+plt.figure()
+plt.subplot(1,2,1)
+plt.plot(np.linspace(0, nframes/fs, nframes), wave)
+plt.subplot(1,2,2)
+plt.pcolormesh(t, f, np.log(S+1), shading='gouraud', cmap='jet')
+
+plt.show()
