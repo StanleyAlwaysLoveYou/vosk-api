@@ -31,16 +31,16 @@ print('num of frames: {}'.format(nframes))
 text = ' '
 
 while True:
-    data = wf.readframes(10000)
+    data = wf.readframes(1000)
     if len(data) == 0:
         break
     rec.AcceptWaveform(data)
+    text = text = rec.PartialResult()
     if 'one' in text:
-        text = rec.Result()
-        print('rec result: {}'.format(text))
-    else:
-        text = rec.PartialResult()
-        print('rec Partial result: {}'.format(text))
+        rec.Result()
+        print('find {}: {}'.format('one', text))
+    # else:
+        # print('rec Partial result: {}'.format(text))
 
 # print('final result: {}'.format(rec.FinalResult()))
 
